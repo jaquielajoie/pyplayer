@@ -45,7 +45,7 @@ def next_note(note_key, note_map):
     # Helper 1: cycle_note
     return random.choice(note_map[note_key])
 
-def trigger_note(play):
+def trigger_note(play, trigger_interface):
     # Helper 2: cycle_note
     # Uses MIDO to trigger notes on the midi bus.
     print(play)
@@ -57,7 +57,7 @@ def update_note(note_key, next_note):
     l.append(next_note)
     return tuple(l[1:])
 
-def cycle_note(note_key, note_map):
+def cycle_note(note_key, note_map, trigger_interface):
     """
     Takes a note in as a key.
     Randomly selects a next note from the note_map via said key.
@@ -70,7 +70,7 @@ def cycle_note(note_key, note_map):
 	note_key = random_key(note_map)	
 	return note_key, note_map
     
-    played = trigger_note(play) # send to midi, incorporate timing, pitch, velocity notemaps
+    played = trigger_note(play, trigger_interface) # send to midi, incorporate timing, pitch, velocity notemaps
     note_key = update_note(note_key, played)
     return note_key, note_map
 
@@ -80,12 +80,14 @@ class MarkovMidiPlayer():
 	self.nlen = nlen
 	self.note_list = note_list
 	self.note_map = assemble_note_map(nlen, note_list)
+	# add the note triggering interface
+	self.trigger_interface = ''
 
     def run(self, iters):
 	note_map = self.note_map
 	note_key = random_key(self.note_map)
 	for i in range(0, iters):
-	    note_key, note_map = cycle_note(note_key, note_map)
+	    note_key, note_map = cycle_note(note_key, note_map, self.trigger_interface)
 	
 
 if __name__ == "__main__":
