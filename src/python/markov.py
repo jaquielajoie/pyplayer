@@ -74,11 +74,22 @@ def cycle_note(note_key, note_map):
     note_key = update_note(note_key, played)
     return note_key, note_map
 
+
+class MarkovMidiPlayer():
+    def __init__(self, nlen, note_list):
+	self.nlen = nlen
+	self.note_list = [1,2,3,4,5,6,7,8,9,8,7,6,7,8,7,6,5,4,5,6,7,6,5,4,8,6,6,4,2,1,2,3,54,7,8,431,2,678,7,5,23,1]	
+	self.note_map = assemble_note_map(nlen, note_list)
+
+    def run(self, iters):
+	note_map = self.note_map
+	note_key = random_key(self.note_map)
+	for i in range(0, iters):
+	    note_key, note_map = cycle_note(note_key, note_map)
+	
+
 if __name__ == "__main__":
     nlen = 2
     note_list = [1,2,3,4,5,4,3,2,3,4,4,3,2,2,2,3,1,2,3,5,1,3,2,1] # replace with mido notes...
-    note_map = assemble_note_map(nlen, note_list)
-    note_key = random_key(note_map)
-
-    for i in range(0, 1000000):
-        note_key, note_map = cycle_note(note_key, note_map)
+    mmp = MarkovMidiPlayer(nlen=nlen, note_list=note_list)
+    mmp.run(100000)
