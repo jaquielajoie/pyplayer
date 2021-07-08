@@ -67,7 +67,6 @@ def cycle_note(note_key, note_map):
     try:
         play = next_note(note_key, note_map)
     except KeyError as k:
-        # Fetch random key, return
 	note_key = random_key(note_map)	
 	return note_key, note_map
     
