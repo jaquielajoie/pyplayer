@@ -64,4 +64,13 @@ def cycle_note(note_key, note_map):
     play = next_note(note_key, note_map)
     played = trigger_note(play) # send to midi, incorporate timing, pitch, velocity notemaps
     note_key = update_note(note_key, played)
-    return note, note_map
+    return note_key, note_map
+
+if __name__ == "__main__":
+    nlen = 2
+    note_key = (1,2)
+    note_list = [1,2,3,4,5,4,3,2,3,4,4,3,2,2,2,3,1,2,3,5,1,3,2,1] # replace with mido notes...
+    note_map = assemble_note_map(nlen, note_list)
+
+    for i in range(0, 20):
+        note_key, note_map = cycle_note(note_key, note_map)
