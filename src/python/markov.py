@@ -81,7 +81,7 @@ class MarkovMidiPlayer():
 	self.note_list = note_list
 	self.note_map = assemble_note_map(nlen, note_list)
 	# add the note triggering interface
-	self.trigger_interface = ''
+	self.trigger_interface = trigger_interface
 
     def run(self, iters):
 	note_map = self.note_map
