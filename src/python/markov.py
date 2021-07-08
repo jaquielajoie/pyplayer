@@ -76,7 +76,7 @@ def cycle_note(note_key, note_map, trigger_interface):
 
 
 class MarkovMidiPlayer():
-    def __init__(self, nlen, note_list):
+    def __init__(self, nlen, note_list, trigger_interface=None):
 	self.nlen = nlen
 	self.note_list = note_list
 	self.note_map = assemble_note_map(nlen, note_list)
