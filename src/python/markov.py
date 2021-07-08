@@ -78,7 +78,7 @@ def cycle_note(note_key, note_map):
 class MarkovMidiPlayer():
     def __init__(self, nlen, note_list):
 	self.nlen = nlen
-	self.note_list = [1,2,3,4,5,6,7,8,9,8,7,6,7,8,7,6,5,4,5,6,7,6,5,4,8,6,6,4,2,1,2,3,54,7,8,431,2,678,7,5,23,1]	
+	self.note_list = note_list
 	self.note_map = assemble_note_map(nlen, note_list)
 
     def run(self, iters):
@@ -90,6 +90,6 @@ class MarkovMidiPlayer():
 
 if __name__ == "__main__":
     nlen = 2
-    note_list = [1,2,3,4,5,4,3,2,3,4,4,3,2,2,2,3,1,2,3,5,1,3,2,1] # replace with mido notes...
+    note_list = [1,2,3,4,5,6,7,8,9,8,7,6,7,8,7,6,5,4,5,6,7,6,5,4,8,6,6,4,2,1,2,3,54,7,8,431,2,678,7,5,23,1] # replace with mido notes...
     mmp = MarkovMidiPlayer(nlen=nlen, note_list=note_list)
     mmp.run(100000)
