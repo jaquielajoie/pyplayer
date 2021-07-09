@@ -4,13 +4,9 @@ a lightweight markov midi sequencer for the people
 
 ## i n s t a l l  
 <code>
-python3 -m venv .venv
-</code>
-<code>
-source .venv/bin/activate
-</code>
-<code>
-pip -r requirements.txt
+python3 -m venv .venv  
+source .venv/bin/activate  
+pip -r requirements.txt  
 </code>
 
 ## r u n
