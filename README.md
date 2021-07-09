@@ -6,7 +6,8 @@ a lightweight markov midi sequencer for the people
 <code>
 python3 -m venv .venv  |  
 source .venv/bin/activate  |  
-pip -r requirements.txt  
+pip -r requirements.txt  |  
+echo "My Disappointment Is Immeasurable And My Day Is Ruined.txt" >> "My Disappointment Is Immeasurable And My Day Is Ruined".txt
 </code>
 
 ## r u n
