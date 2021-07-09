@@ -87,7 +87,7 @@ class MidiInterface():
             format = "%(asctime)s: %(message)s"
             logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
             logging.info('Creating new channel_midi (MidiInterface.play_tracks)')
-            channel_midi = threading.Thread(target=print_midi, args=(i, track, midi_interface.port))
+            channel_midi = threading.Thread(target=log, args=(i, track, midi_interface.port))
             logging.info("play_tracks: before starting thread")
             channel_midi.start()
             logging.info("play_tracks: waiting for the thread to finish")
