@@ -1,6 +1,6 @@
 # p y p l a y e r
 a lightweight markov midi sequencer for the people
-> 200 lines of code for core
+> 200 lines of code (core functionality)
 
 ## i n s t a l l  
 <code>
