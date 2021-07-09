@@ -1,7 +1,9 @@
-from markov import MarkovMidiPlayer
+from mido_interface import MidiInterface
 
 if __name__ == "__main__":
-    nlen = 2
-    note_list = [1,2,3,4,5,6,7,8,9,8,7,6,7,8,7,6,5,4,5,6,7,6,5,4,8,6,6,4,2,1,2,3,54,7,8,431,2,678,7,5,23,1] # replace with mido notes...
-    mmp = MarkovMidiPlayer(nlen=nlen, note_list=note_list)
-    mmp.run(100000)
+    mi = MidiInterface()
+    mi.config_tracks()
+    mi.set_tempo(bpm_denom=120)
+    mi.shift_pitch(semitones=18)
+    mi.shift_velocity(vel=-25)
+    mi.remix_tracks(nlen=4, iters=1000000)

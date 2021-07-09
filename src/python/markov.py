@@ -1,5 +1,6 @@
 from collections import defaultdict
 import random
+import time
 
 def make_ngrams(nlen, notes):
     # Helper 1: assemble_note_map
@@ -45,10 +46,10 @@ def next_note(note_key, note_map):
     # Helper 1: cycle_note
     return random.choice(note_map[note_key])
 
-def trigger_note(play, trigger_interface):
+def trigger_note(play, interface):
     # Helper 2: cycle_note
     # Uses MIDO to trigger notes on the midi bus.
-    print(play)
+    interface.play_note(play)
     return play
 
 def update_note(note_key, next_note):
@@ -57,7 +58,7 @@ def update_note(note_key, next_note):
     l.append(next_note)
     return tuple(l[1:])
 
-def cycle_note(note_key, note_map, trigger_interface):
+def cycle_note(note_key, note_map, midi_port):
     """
     Takes a note in as a key.
     Randomly selects a next note from the note_map via said key.
@@ -70,28 +71,28 @@ def cycle_note(note_key, note_map, trigger_interface):
         note_key = random_key(note_map)
         return note_key, note_map
 
-    played = trigger_note(play, trigger_interface) # send to midi, incorporate timing, pitch, velocity notemaps
+    played = trigger_note(play, midi_port) # send to midi, incorporate timing, pitch, velocity notemaps
     note_key = update_note(note_key, played)
     return note_key, note_map
 
 
 class MarkovPlayer():
-    def __init__(self, nlen, note_list, trigger_interface=None):
+    def __init__(self, nlen, note_list, interface=None):
         self.nlen = nlen
         self.note_list = note_list
         self.note_map = assemble_note_map(nlen, note_list)
     	# add the note triggering interface
-        self.trigger_interface = trigger_interface
+        self.interface = interface
 
     def run(self, iters):
         note_map = self.note_map
         note_key = random_key(self.note_map)
         for i in range(0, iters):
-            note_key, note_map = cycle_note(note_key, note_map, self.trigger_interface)
+            note_key, note_map = cycle_note(note_key, note_map, self.interface)
 
 
 if __name__ == "__main__":
     nlen = 2
     note_list = [1,2,3,4,5,6,7,8,9,8,7,6,7,8,7,6,5,4,5,6,7,6,5,4,8,6,6,4,2,1,2,3,54,7,8,431,2,678,7,5,23,1] # replace with mido notes...
-    mp = MarkovPlayer(nlen=nlen, note_list=note_list)
+    mp = MarkovPlayer(nlen=nlen, note_list=note_list, interface=None)
     mmp.run(100000)

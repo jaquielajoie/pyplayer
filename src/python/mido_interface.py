@@ -7,6 +7,7 @@ import logging
 import threading
 from mido import MidiFile
 from markov import MarkovPlayer
+from mido import bpm2tempo
 from mido.frozen import freeze_message
 
 def config_backend(port_string='IAC Driver Bus 1'):
@@ -21,14 +22,14 @@ def get_tracks(filepath):
     midi = MidiFile(filepath)
     return midi.tracks
 
-def print_midi(name, track, port):
+def log(name, track, interface):
     logging.info("Thread %s: starting", name)
     for msg in track:
         time.sleep(int((msg.time + name) / 240))# / 480)) #480 is the default ticks per 8th note
         if msg.type != 'unknown_meta':
             print(msg)
             if not msg.is_meta:
-                port.send(msg)
+                interface.port.play_note(msg)
         elif hasattr(msg, 'data'):
             print('\nUnknown meta message type: ' + str(msg.type_byte) + '\nmsg data: ' + str(msg.data))
         else:
@@ -40,17 +41,45 @@ class MidiInterface():
     def __init__(self):
         self.port = config_backend()
         self.tracks = None
+        self.bpm_denom = 120
+        self.bpm_scale = 4
+        self.semitones = 0
+        self.vel = 0
 
     def config_tracks(self):
         filepath = input('Enter in the full midi file path: ').rstrip()
         self.tracks = get_tracks(filepath)
 
+    def set_tempo(self, bpm_denom):
+        self.bpm_denom = bpm_denom
+
+    def shift_pitch(self, semitones):
+        self.semitones = semitones
+
+    def shift_velocity(self, vel):
+        self.vel = vel
+
     def freeze_messages(self, track):
         frozen = []
-        for message in track:
-            msg = freeze_message(message)
-            frozen.append(msg)
+        for m in track:
+            if m.type in ['note_on', 'note_off']:
+                m.velocity = abs(m.velocity + self.vel) % 127 # add floor
+                m.note = abs(m.note + self.semitones) % 127 # maybe this should be handled better...
+                msg = freeze_message(m)
+                frozen.append(msg)
         return frozen
+
+    def play_note(self, msg):
+        if msg.is_meta:
+            return
+
+        sleep = int(msg.time / self.bpm_denom ) // self.bpm_scale
+        time.sleep(sleep)
+        self.port.send(msg)
+
+        print(msg)
+
+        return msg
 
     def play_tracks(self, nlen=None): # nlen not used, just for debugging convience [will delete]
         for i, track in enumerate(midi_interface.tracks):
@@ -64,12 +93,11 @@ class MidiInterface():
             logging.info("play_tracks: waiting for the thread to finish")
             logging.info("play_tracks: finised thread")
 
-    def remix_tracks(self, nlen):
-        mp = MarkovPlayer(nlen=nlen, note_list=self.freeze_messages(self.tracks[0]))
-        mp.run(10000)
-
+    def remix_tracks(self, nlen, iters):
+        mp = MarkovPlayer(nlen=nlen, note_list=self.freeze_messages(self.tracks[0]), interface=self)
+        mp.run(iters)
 
 if __name__ == "__main__":
     midi_interface = MidiInterface()
     midi_interface.config_tracks()
-    midi_interface.play_tracks(nlen=2)
+    midi_interface.remix_tracks(nlen=4)
