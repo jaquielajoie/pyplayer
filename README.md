@@ -4,8 +4,8 @@ a lightweight markov midi sequencer for the people
 
 ## i n s t a l l  
 <code>
-python3 -m venv .venv  
-source .venv/bin/activate  
+python3 -m venv .venv  |  
+source .venv/bin/activate  |  
 pip -r requirements.txt  
 </code>
 
