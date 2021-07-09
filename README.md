@@ -17,9 +17,9 @@ python main.py
 
 ## f u t u r e
 - tkinter app
-  - pitch shift
-  - tempo shift
-  - velocity shift
+  - pitch shift ✔️
+  - tempo shift ✔️
+  - velocity shift ✔️
   - save midi
   - configure bussing
 
