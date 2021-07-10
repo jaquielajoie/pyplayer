@@ -1,3 +1,12 @@
+"""
+==========================================
+ Title:  PyPlayer MidiInterface
+ Author: @jaquielajoie
+ Date:   9 July 2021
+ Liscence: Apache 2.0
+==========================================
+"""
+
 import os
 import mido
 import base64
@@ -6,7 +15,7 @@ import time
 import logging
 import threading
 from mido import MidiFile
-from markov import MarkovPlayer
+from pyplayer.markov import MarkovPlayer
 from mido import bpm2tempo
 from mido.frozen import freeze_message
 
@@ -41,7 +50,7 @@ class MidiInterface():
     def __init__(self):
         self.port = config_backend()
         self.tracks = None
-        self.bpm_denom = 120
+        self.bpm = 120
         self.bpm_scale = 4
         self.semitones = 0
         self.vel = 0
@@ -50,8 +59,8 @@ class MidiInterface():
         filepath = input('Enter in the full midi file path: ').rstrip()
         self.tracks = get_tracks(filepath)
 
-    def set_tempo(self, bpm_denom):
-        self.bpm_denom = bpm_denom
+    def set_tempo(self, bpm):
+        self.bpm = bpm
 
     def shift_pitch(self, semitones):
         self.semitones = semitones
@@ -73,7 +82,7 @@ class MidiInterface():
         if msg.is_meta:
             return
 
-        sleep = int(msg.time / self.bpm_denom ) // self.bpm_scale
+        sleep = int(msg.time * self.bpm_scale // self.bpm )
         time.sleep(sleep)
         self.port.send(msg)
 
