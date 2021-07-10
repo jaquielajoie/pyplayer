@@ -55,8 +55,9 @@ class MidiInterface():
         self.semitones = 0
         self.vel = 0
 
-    def config_tracks(self):
-        filepath = input('Enter in the full midi file path: ').rstrip()
+    def config_tracks(self, filepath=None):
+        if filepath is None:
+            filepath = input('Enter in the full midi file path: ').rstrip()
         self.tracks = get_tracks(filepath)
 
     def set_tempo(self, bpm):
