@@ -3,6 +3,7 @@
  Title:  PyPlayer Markov Chain
  Author: @jaquielajoie
  Date:   9 July 2021
+ Liscence: Apache 2.0
 ==========================================
 """
 

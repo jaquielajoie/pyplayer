@@ -1,0 +1,72 @@
+<AppContainer>
+    id: app_view
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 10
+        size: root.width, root.height
+
+        FileChooserListView:
+            id: midi_filechooser
+            on_selection: app_view.selected(midi_filechooser.selection)
+            path: "/Users/jackie/Documents/pyplayer/midi/"
+
+        BoxLayout:
+            orientation: "vertical"
+
+            BoxLayout:
+                id: options_view
+                orientation: "horizontal"
+
+                BoxLayout:
+                    orientation: "vertical"
+
+                    Label:
+                        text: "Select a file..."
+                        font_size: 24
+
+                    Label:
+                        id: midifile_label
+                        text: "<filepath>"
+                        font_size: 12
+
+                BoxLayout:
+                    orientation: "vertical"
+
+                    Label:
+                        id: ngram_slider_label
+                        text: "Set NGram length"
+                        font_size: 24
+
+                    Label:
+                        id: ngram_slider_out
+                        text: "1"
+                        font_size: 16
+
+                    Slider:
+                        min: 1
+                        max: 16
+                        step: 1
+                        orientation: "horizontal"
+                        on_value: root.slide_ngram(*args)
+
+            BoxLayout:
+                Button:
+                    font_size: 16
+                    background_normal: ''
+                    background_color: (0.6, 0.6, 0.6, 0.65)
+                    text: "Reset Defaults"
+                    on_press: root.reset_press()
+
+                Button:
+                    font_size: 16
+                    background_normal: ''
+                    background_color: (0, 1, 0, 0.65)
+                    text: "Start"
+                    on_press: root.start_press()
+
+                Button:
+                    font_size: 16
+                    background_normal: ''
+                    background_color: (1, 0, 0, 0.65)
+                    text: "End"
+                    on_press: root.end_press()
