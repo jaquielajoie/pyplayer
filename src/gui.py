@@ -17,7 +17,7 @@ from kivy.uix.floatlayout import FloatLayout
 import os
 
 
-Builder.load_file(os.path.abspath('design/main.kv'))
+Builder.load_file(os.path.abspath('kivy/design/main.kv'))
 
 
 class AppContainer(Widget):
@@ -42,7 +42,6 @@ class AppContainer(Widget):
         self.mi.shift_pitch(semitones=0)
         self.mi.shift_velocity(vel=0)
         self.mi.remix_tracks(nlen=4, iters=10000)
-
 
     def end_press(self):
         print(self.mi)

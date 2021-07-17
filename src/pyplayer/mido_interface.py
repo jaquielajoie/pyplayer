@@ -14,8 +14,11 @@ import math
 import time
 import logging
 import threading
+import mido
 from mido import MidiFile
 from pyplayer.markov import MarkovPlayer
+from pyplayer.keycache import KeyCache
+from pyplayer.sleepmanager import SleepManager
 from mido import bpm2tempo
 from mido.frozen import freeze_message
 
@@ -31,6 +34,17 @@ def get_tracks(filepath):
     midi = MidiFile(filepath)
     return midi.tracks
 
+def decompose_messages(frozen_messages):
+    notes = []
+    triggers = []
+    durations = []
+    for msg in frozen_messages:
+        notes.append(msg.note)
+        triggers.append(msg.type)
+        durations.append(msg.time)
+    return {"notes": notes, "triggers": triggers, "durations": durations}
+
+
 def log(name, track, interface):
     logging.info("Thread %s: starting", name)
     for msg in track:
@@ -45,7 +59,13 @@ def log(name, track, interface):
             print('\nUnknown meta message type: ' + str(msg.type_byte) + '\nNo data associated with unknown meta message')
     logging.info("Thread %s: finishing", name)
 
+"""
+Parent: ThreadManager
+    Child: MidiInterface
 
+Parent: MidiInterface (processes 1 track)
+    Children: [MarkovPlayer, KeyCache, SleepManager]
+"""
 class MidiInterface():
     def __init__(self):
         self.port = config_backend()
@@ -79,15 +99,13 @@ class MidiInterface():
                 frozen.append(msg)
         return frozen
 
-    def play_note(self, msg):
-        if msg.is_meta:
+    def play_note(self, play, keycache):
+        msg = mido.Message(play["trigger"], note=play["note"], time=play["duration"])
+
+        if msg.is_meta: # Not possible as of 7-12-21
             return
 
-        sleep = int(msg.time * self.bpm_scale // self.bpm )
-        time.sleep(sleep)
-        self.port.send(msg)
-
-        print(msg)
+        keycache.process(msg)
 
         return msg
 
@@ -104,8 +122,17 @@ class MidiInterface():
             logging.info("play_tracks: finised thread")
 
     def remix_tracks(self, nlen, iters):
-        mp = MarkovPlayer(nlen=nlen, note_list=self.freeze_messages(self.tracks[0]), interface=self)
-        mp.run(iters)
+        midi_list = decompose_messages(self.freeze_messages(self.tracks[0]))
+        """
+
+        """
+        mp = MarkovPlayer(nlen=nlen, midi_list=midi_list, interface=self)
+        keycache = KeyCache(port=self.port, polyphony=1)
+        sleepmanager = SleepManager(bpm=self.bpm)
+
+        mp.run(iters, keycache, sleepmanager)
+        # End track
+        mp.stop()
 
 if __name__ == "__main__":
     midi_interface = MidiInterface()

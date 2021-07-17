@@ -1,19 +1,17 @@
 """
 ==========================================
- Title:  PyPlayer Markov Chain
+ Title:  PyPlayer MarkovChain
  Author: @jaquielajoie
  Date:   9 July 2021
  Liscence: Apache 2.0
 ==========================================
 """
-
 from collections import defaultdict
 import random
-import time
 
-def make_ngrams(nlen, notes):
+def make_ngrams(nlen, values):
     # Helper 1: assemble_note_map
-    return [notes[i:i+nlen+1] for i in range(0,len(notes))]
+    return [values[i:i+nlen+1] for i in range(0,len(values))]
 
 def ngram_and_next(ngrams):
     # Helper 2: assemble_note_map
@@ -39,36 +37,38 @@ def aggregate_patterns(ngrams):
         d[ngram[0]].append(ngram[1])
     return d
 
-def assemble_note_map(nlen, note_list):
+def assemble_note_map(nlen, midi_list):
     """
     Takes in a list of midi notes.
     Creates tuple-keys of nlen. Next note is stored as value.
     Removes all tuple-keys less than nlen.
     Creates a dictionary of tuple-keys: list of values.
     """
-    return aggregate_patterns(prune_ngrams(ngram_and_next(make_ngrams(nlen, note_list)), nlen))
+    return aggregate_patterns(prune_ngrams(ngram_and_next(make_ngrams(nlen, midi_list)), nlen))
 
-def random_key(note_map):
-    return random.choice(list(note_map.keys()))
+def random_key(midi_map):
+    return random.choice(list(midi_map.keys()))
 
-def next_note(note_key, note_map):
+def next_value(key, midi_map):
     # Helper 1: cycle_note
-    return random.choice(note_map[note_key])
+    return random.choice(midi_map[key])
 
-def trigger_note(play, interface, test=False):
-    # Helper 2: cycle_note
-    # Uses MIDO to trigger notes on the midi bus.
+def trigger_note(play, interface, keycache, sleepmanager, test=False):
+    # Send the midi message
     if test is False:
-        interface.play_note(play)
+        interface.play_note(play, keycache)
+        sleepmanager.rest(duration=play["duration"])
     return play
 
-def update_note(note_key, next_note):
+def update_value(key, next_value):
     # Helper 3: cycle_note
-    l = list(note_key)
-    l.append(next_note)
-    return tuple(l[1:])
+    l = list(key)
+    l.append(next_value)
+    updated_key = tuple(l[1:])
 
-def cycle_note(note_key, note_map, midi_port, test=False):
+    return updated_key
+
+def cycle_note(keys, midi_map, interface, keycache, sleepmanager, test=False):
     """
     Takes a note in as a key.
     Randomly selects a next note from the note_map via said key.
@@ -76,31 +76,100 @@ def cycle_note(note_key, note_map, midi_port, test=False):
     Returns this choice and note_map(s).
     """
     try:
-        play = next_note(note_key, note_map)
+        # triggers_durations_map
+        note_play = next_value(keys["note_key"], midi_map["notes_map"])
+        trigger_play = next_value(keys["trigger_key"], midi_map["triggers_map"])
+        duration_play = next_value(keys["duration_key"], midi_map["durations_map"])
     except KeyError as k:
-        note_key = random_key(note_map)
-        return note_key, note_map
+        note_key = random_key(midi_map["notes_map"])
+        trigger_key = random_key(midi_map["triggers_map"])
+        duration_key = random_key(midi_map["durations_map"])
 
-    played = trigger_note(play, midi_port, test) # send to midi, incorporate timing, pitch, velocity notemaps
-    note_key = update_note(note_key, played)
-    return note_key, note_map
+        keys = {"note_key": note_key, "trigger_key": trigger_key, "duration_key": duration_key}
+        return keys, midi_map
+
+    play = {"note": note_play, "trigger": trigger_play, "duration": duration_play}
+
+    try:
+        trigger_note(play, interface, keycache, sleepmanager, test)
+
+    except Exception as e:
+        print(e)
+        quit()
+
+    note_key = update_value(keys["note_key"], note_play)
+    trigger_key = update_value(keys["trigger_key"], trigger_play)
+    duration_key = update_value(keys["duration_key"], duration_play)
+
+    keys = {"note_key": note_key, "trigger_key": trigger_key, "duration_key": duration_key}
+
+    return keys, midi_map
 
 
 class MarkovPlayer():
-    def __init__(self, nlen, note_list, interface=None, test=False):
+    def __init__(self, nlen, midi_list, interface=None, test=False):
         self.nlen = nlen
-        self.note_list = note_list
-        self.note_map = assemble_note_map(nlen, note_list)
+
+        notes_map = assemble_note_map(nlen, midi_list["notes"])
+        triggers_map = assemble_note_map(nlen, midi_list["triggers"]) # Need to tie duration & trigger into one map
+        durations_map = assemble_note_map(nlen, midi_list["durations"])
+
+        self.midi_map = {
+            "notes_map": notes_map,
+            "triggers_map": triggers_map,
+            "durations_map": durations_map
+        }
     	# add the note triggering interface
         self.interface = interface
         self.test = test
 
-    def run(self, iters):
-        note_map = self.note_map
-        note_key = random_key(self.note_map)
-        for i in range(0, iters):
-            note_key, note_map = cycle_note(note_key, note_map, self.interface, self.test)
+    def run(self, iters, keycache, sleepmanager):
+        """
+        interface:
+            ticks per beat based on BPM
 
+        Keycache:
+            pressed notes
+                elasped time from press
+            track running time
+            track measures
+
+        Current bugs:
+            Running through iterations too quickly
+                Handle time.sleep(N) more gracefully
+                Quantize this to BPM or ticks
+            Add debugging tool to CMD line/GUI (key press)
+
+        Minimum sleep times:
+            note_off    10 or 0 (if elapsed time for note > 10)
+            note_on     0
+
+        Handling Notes:
+            track note, time_pressed, polyphony
+            if note_on
+                handle_note_on
+                    add note, duration
+            if note_off
+                handle_note_off
+                    remove either
+                        note value (if currently pressed)
+                        OR longest elasped note value
+                            THEN handle_note_on
+            if exceeds polyphony
+                handle_note_off
+        """
+        midi_map = self.midi_map
+        note_key = random_key(self.midi_map["notes_map"])
+        trigger_key = random_key(self.midi_map["triggers_map"])
+        duration_key = random_key(self.midi_map["durations_map"])
+
+        keys = {"note_key": note_key, "trigger_key": trigger_key, "duration_key": duration_key}
+
+        for i in range(0, iters):
+            keys, midi_map = cycle_note(keys, midi_map, self.interface, keycache, sleepmanager, self.test)
+
+    def stop(self):
+        pass
 
 if __name__ == "__main__":
     nlen = 2
