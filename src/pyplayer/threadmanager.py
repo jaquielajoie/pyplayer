@@ -43,4 +43,7 @@ class ThreadManager:
             midi_io = [executor.submit(interface.remix_track, 1000) for interface in self.interfaces]
 
     def raise_exception(self):
+        """
+        How to gracefully stop all threads??
+        """
         pass

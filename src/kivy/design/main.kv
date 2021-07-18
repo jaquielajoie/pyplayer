@@ -5,42 +5,116 @@
         spacing: 10
         size: root.width, root.height
 
-        FileChooserListView:
-            id: midi_filechooser
-            on_selection: app_view.selected(midi_filechooser.selection)
-            path: "/Users/jackie/Documents/pyplayer/src/midi/"
-
         BoxLayout:
+            id: top_half
             orientation: "vertical"
 
             BoxLayout:
-                id: options_view
+                orientation: "vertical"
+
+                FileChooserListView:
+                    id: midi_filechooser
+                    on_selection: app_view.selected(midi_filechooser.selection)
+                    path: "/Users/jackie/Documents/pyplayer/src/midi/"
+
+                Label:
+                    id: midifile_label
+                    color: (1, 0, 0, 0.65)
+                    text: "No file selected, cannot start!"
+                    font_size: 16
+
+        BoxLayout:
+            id: bottom_half
+            orientation: "vertical"
+
+            BoxLayout:
                 orientation: "horizontal"
 
                 BoxLayout:
                     orientation: "vertical"
 
                     Label:
-                        text: "Select a file..."
+                        id: velocity_slider_label
+                        text: "Shift Velocity"
                         font_size: 24
+                        color: (1, 1, 1, 0.65)
 
                     Label:
-                        id: midifile_label
-                        text: "<filepath>"
-                        font_size: 12
+                        id: velocity_slider_out
+                        text: "0"
+                        font_size: 16
+                        color: (0.65, 0.65, 0.65, 0.76)
+
+                    Slider:
+                        min: -24
+                        max: 24
+                        step: 1
+                        orientation: "horizontal"
+                        on_value: root.slide_velocity(*args)
+
+                BoxLayout:
+                    orientation: "vertical"
+
+                    Label:
+                        id: bpm_slider_label
+                        text: "BPM"
+                        font_size: 24
+                        color: (1, 1, 1, 0.65)
+
+
+                    Label:
+                        id: bpm_slider_out
+                        text: "60"
+                        font_size: 16
+                        color: (0.65, 0.65, 0.65, 0.76)
+
+
+                    Slider:
+                        min: 40
+                        max: 240
+                        step: 1
+                        orientation: "horizontal"
+                        on_value: root.slide_bpm(*args)
+
+            BoxLayout:
+                orientation: "horizontal"
+
+                BoxLayout:
+                    orientation: "vertical"
+
+                    Label:
+                        id: pitch_slider_label
+                        text: "Pitch Shift"
+                        font_size: 24
+                        color: (1, 1, 1, 0.65)
+
+                    Label:
+                        id: pitch_slider_out
+                        text: "0"
+                        font_size: 16
+                        color: (0.65, 0.65, 0.65, 0.85)
+
+                    Slider:
+                        min: -12
+                        max: 12
+                        step: 1
+                        orientation: "horizontal"
+                        on_value: root.slide_pitch(*args)
 
                 BoxLayout:
                     orientation: "vertical"
 
                     Label:
                         id: ngram_slider_label
-                        text: "Set NGram length"
+                        text: "nGram Length"
                         font_size: 24
+                        color: (1, 1, 1, 0.65)
 
                     Label:
                         id: ngram_slider_out
                         text: "1"
                         font_size: 16
+                        color: (0.65, 0.65, 0.65, 0.85)
 
                     Slider:
                         min: 1
@@ -50,12 +124,22 @@
                         on_value: root.slide_ngram(*args)
 
             BoxLayout:
-                Button:
-                    font_size: 16
-                    background_normal: ''
-                    background_color: (0.6, 0.6, 0.6, 0.65)
-                    text: "Reset Defaults"
-                    on_press: root.reset_press()
+                orientation: "horizontal"
+
+                BoxLayout:
+                    orientation: "vertical"
+
+                    TextInput:
+                        id: iters_input
+                        hint_text:'Number of Iterations'
+                        background_color: (0.3, 0.3, 0.3, 0.65)
+                        on_text: root.validate_int()
+
+                    Label:
+                        id: iters_valid_label
+                        text: "Invalid Iteration #"
+                        font_size: 12
+                        color: (1, 0, 0, 0.65)
 
                 Button:
                     font_size: 16
@@ -68,5 +152,5 @@
                     font_size: 16
                     background_normal: ''
                     background_color: (1, 0, 0, 0.65)
-                    text: "End"
+                    text: "N/A"
                     on_press: root.end_press()
