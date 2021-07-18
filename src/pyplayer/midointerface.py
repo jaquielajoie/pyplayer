@@ -67,18 +67,28 @@ Parent: MidiInterface (processes 1 track)
     Children: [MarkovPlayer, KeyCache, SleepManager]
 """
 class MidiInterface():
+
     def __init__(self):
         self.port = config_backend()
         self.tracks = None
+        self.polyphony = 2
         self.bpm = 120
         self.bpm_scale = 4
         self.semitones = 0
         self.vel = 0
+        self.channel_number = 0
+        self.nlen = 1
 
     def config_tracks(self, filepath=None):
         if filepath is None:
             filepath = input('Enter in the full midi file path: ').rstrip()
         self.tracks = get_tracks(filepath)
+
+    def set_nlen(self, nlen):
+        self.nlen = nlen
+
+    def set_channel_number(self, channel_number):
+        self.channel_number = channel_number
 
     def set_tempo(self, bpm):
         self.bpm = bpm
@@ -121,20 +131,28 @@ class MidiInterface():
             logging.info("play_tracks: waiting for the thread to finish")
             logging.info("play_tracks: finised thread")
 
-    def remix_tracks(self, nlen, iters):
-        midi_list = decompose_messages(self.freeze_messages(self.tracks[0]))
+    def remix_track(self, iters):
+        channel_number = min( (len(self.tracks) - 1 ), self.channel_number )
+        midi_list = decompose_messages(self.freeze_messages(self.tracks[channel_number]))
         """
 
         """
-        mp = MarkovPlayer(nlen=nlen, midi_list=midi_list, interface=self)
-        keycache = KeyCache(port=self.port, polyphony=1)
+        mp = MarkovPlayer(nlen=self.nlen, midi_list=midi_list, interface=self)
+        keycache = KeyCache(port=self.port, polyphony=self.polyphony)
         sleepmanager = SleepManager(bpm=self.bpm)
 
         mp.run(iters, keycache, sleepmanager)
-        # End track
-        mp.stop()
+        # turn all notes off
+        keycache.nuke()
+
+    def stop_playing(self):
+        """
+        end the remix_track process
+        """
+        print('triggered stop_playing...')
+
 
 if __name__ == "__main__":
     midi_interface = MidiInterface()
     midi_interface.config_tracks()
-    midi_interface.remix_tracks(nlen=4)
+    midi_interface.remix_track(nlen=4)

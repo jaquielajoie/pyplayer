@@ -9,7 +9,8 @@
 import kivy as kv
 from kivy.app import App
 from kivy.uix.widget import Widget
-from pyplayer.mido_interface import MidiInterface
+from pyplayer.threadmanager import ThreadManager
+from pyplayer.threadmanager import ThreadManager
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
@@ -37,15 +38,22 @@ class AppContainer(Widget):
     def start_press(self):
         filepath = self.ids.midifile_label.text
         ngram_len = int(self.ids.ngram_slider_out.text)
-        self.mi.config_tracks(filepath=filepath)
-        self.mi.set_tempo(bpm=120)
-        self.mi.shift_pitch(semitones=0)
-        self.mi.shift_velocity(vel=0)
-        self.mi.remix_tracks(nlen=4, iters=10000)
+
+        """
+        Test input
+        """
+        midi_config = [(filepath, ngram_len)] # channel number
+
+        self.threadmanager.start(midi_config)
+        # self.mi.config_tracks(filepath=filepath)
+        # self.mi.set_tempo(bpm=120)
+        # self.mi.shift_pitch(semitones=0)
+        # self.mi.shift_velocity(vel=0)
+        # self.mi.remix_track(nlen=4, iters=10000)
 
     def end_press(self):
-        print(self.mi)
-        print('End...')
+        pass
+        # self.mi.stop_playing()
 
     def slide_ngram(self, *args):
         self.ids.ngram_slider_out.text = str(int(args[1]))
@@ -53,7 +61,9 @@ class AppContainer(Widget):
 
     def __init__(self, **kwargs):
         super(AppContainer, self).__init__(**kwargs)
-        self.mi = MidiInterface()
+
+        self.threadmanager = ThreadManager()
+        # self.mi = MidiInterface() # replace this with ThreadManager
 
 
 class MarkovApp(App):

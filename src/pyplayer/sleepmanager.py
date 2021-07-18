@@ -11,6 +11,7 @@ import time
 
 """
 SleepManager is a child of MarkovPlayer
+This class quantizes sleep times according to BPM   
 """
 
 class SleepManager:
@@ -20,4 +21,3 @@ class SleepManager:
 
     def rest(self, duration):
         time.sleep(duration / 480)
- 

@@ -6,6 +6,9 @@
  Liscence: Apache 2.0
 ==========================================
 
+This class limits the number of keys pressed simultaneously
+    and fixes on/off sequencing errors.
+
 Class limits the total number of pressed notes at one time
 """
 import mido
@@ -56,3 +59,8 @@ class KeyCache:
     def trigger_note(self, msg):
         self.port.send(msg)
         print(msg)
+
+    def nuke(self):
+        for tone in range(1, 128):
+            off_note = self.tone_to_msg('note_off', tone=tone, time=0)
+            self.trigger_note(msg=off_msg)
