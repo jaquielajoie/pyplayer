@@ -32,6 +32,7 @@ class AppContainer(Widget):
 
 
         except Exception as e:
+            self.ids.midifile_label.text = "No file selected, cannot start!"
             print(f"Error on select... {e}")
 
     def slide_velocity(self, *args):
@@ -101,6 +102,7 @@ class AppContainer(Widget):
             if isinstance(val, int) and val > 0:
                 self.ids.iters_valid_label.text = f'Program will generate {str(val)} note(s).'
                 self.ids.iters_valid_label.color = (0, 1, 0, 0.65)
+                self.iters = val
 
             else:
                 self.ids.iters_valid_label.text = f'Invalid Iteration #: {str(val)}'
@@ -113,29 +115,46 @@ class AppContainer(Widget):
 
     def start_press(self):
 
-        filepath = self.ids.midifile_label.text
-        ngram_len = int(self.ids.ngram_slider_out.text)
-        pitch_shift = int(self.ids.pitch_slider_out.text)
+        if self.ids.midifile_label.text != "No file selected, cannot start!":
 
-        try:
-            raw = self.ids.iters_input.text
-            iters = int(raw)
+            filepath = self.ids.midifile_label.text
+            ngram_len = int(self.ids.ngram_slider_out.text)
+            pitch_shift = int(self.ids.pitch_slider_out.text)
+            velocity_shift = int(self.ids.velocity_slider_out.text)
+            bpm = int(self.ids.bpm_slider_out.text)
+            iters = int(self.iters)
 
-            """
-            Test input
-            """
-            midi_config = [(filepath, ngram_len)] # channel number
+            try:
+                raw = self.ids.iters_input.text
+                iters = int(raw)
 
-            self.threadmanager.start(midi_config)
-            # self.mi.config_tracks(filepath=filepath)
-            # self.mi.set_tempo(bpm=120)
-            # self.mi.shift_pitch(semitones=0)
-            # self.mi.shift_velocity(vel=0)
-            # self.mi.remix_track(nlen=4, iters=10000)
+                """
+                Test input
+                """
+                conf = {
+                    "filepath": filepath,
+                    "ngram_len": ngram_len,
+                    "pitch_shift": pitch_shift,
+                    "velocity_shift": velocity_shift,
+                    "bpm": bpm,
+                    "iters": iters
+                }
 
-        except ValueError as v:
-            print(v)
-            quit()
+                midi_config = [conf] # channel number
+
+                self.threadmanager.start(midi_config)
+                # self.mi.config_tracks(filepath=filepath)
+                # self.mi.set_tempo(bpm=120)
+                # self.mi.shift_pitch(semitones=0)
+                # self.mi.shift_velocity(vel=0)
+                # self.mi.remix_track(nlen=4, iters=10000)
+
+            except ValueError as v:
+                print(v)
+                quit()
+        else:
+            print(f"You need to select a file!")
+
 
     def end_press(self):
         pass
@@ -144,7 +163,9 @@ class AppContainer(Widget):
     def __init__(self, **kwargs):
         super(AppContainer, self).__init__(**kwargs)
 
+        self.iters = 1
         self.threadmanager = ThreadManager()
+
         # self.mi = MidiInterface() # replace this with ThreadManager
 
 

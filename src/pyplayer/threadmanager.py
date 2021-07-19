@@ -14,15 +14,20 @@ class ThreadManager:
 
     def __init__(self): # *args, **kwargs
         self.interaces = []
+        self.iters = 1
 
     def configure_midi_interfaces(self, midi_config):
 
         interfaces = []
         for conf in midi_config:
             mi = MidiInterface()
-            print(conf[0])
-            mi.config_tracks(filepath=conf[0])
-            mi.set_nlen(nlen=conf[1])
+            mi.config_tracks(filepath=conf["filepath"])
+            mi.set_nlen(nlen=conf["ngram_len"])
+            mi.set_tempo(bpm=conf["bpm"])
+            mi.shift_velocity(vel=conf["velocity_shift"])
+            mi.shift_pitch(semitones=conf["pitch_shift"])
+            self.iters = conf["iters"]
+
             """
             Change channel_number to track number to be selected (of midi file)
             """
@@ -40,7 +45,7 @@ class ThreadManager:
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # submit starts the function
-            midi_io = [executor.submit(interface.remix_track, 1000) for interface in self.interfaces]
+            midi_io = [executor.submit(interface.remix_track, self.iters) for interface in self.interfaces]
 
     def raise_exception(self):
         """
