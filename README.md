@@ -28,7 +28,7 @@ pip -r requirements.txt
 - venv must be activated
 - dependencies must be installed
 
-... Starting after the end of the install step...
+<b>...Starting after the end of the install step...</b>    
 <code>
 cd src
 </code>
