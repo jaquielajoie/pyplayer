@@ -50,3 +50,6 @@ python gui.py
 - "IAC Driver Bus 1" is set as the default midi bus (MAC compatible)
 - rtmidi is used as the mido backend
 - these must be changed in the code manually at the moment
+
+
+![dead](img/dead.jpeg "")
