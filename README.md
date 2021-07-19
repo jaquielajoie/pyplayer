@@ -46,7 +46,7 @@ python gui.py
 - new midi files can be selected once all notes have been played
 - improved threading will allow interaction while notes are being transmitted
 
-# Bussing
+# B u s s i n g 🚌   🚌🚌   🚌🚌🚌
 - "IAC Driver Bus 1" is set as the default midi bus (MAC compatible)
 - rtmidi is used as the mido backend
 - these must be changed in the code manually at the moment
