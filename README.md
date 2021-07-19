@@ -3,8 +3,7 @@ a lightweight markov midi sequencer for the people
 > ~200 lines (core functionality)
 
 # Components
-> ThreadManager will allow for 16 synchronized midi streams
-> This corresponds to 1 per midi channel  
+> ThreadManager will allow for 16 synchronized midi streams. This corresponds to 1 per midi channel  
 
 - Kivy App: GUI
   - ThreadManager: ThreadPoolExecutor
