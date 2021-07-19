@@ -12,7 +12,7 @@ a lightweight markov midi sequencer for the people
       - MarkovPlayer: Pattern Generation
       - KeyCache: Polyphony Management & On/Off sequencing
 
-## i n s t a l l  
+## i n s t a l l  ( M A C )
 <code>
 git clone https://github.com/jaquielajoie/pyplayer.git | cd pyplayer
 </code>  
