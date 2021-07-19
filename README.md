@@ -2,7 +2,7 @@
 a lightweight markov midi sequencer for the people
 > ~200 lines (core functionality)
 
-# Components
+# C o m p o n e n t s
 > ThreadManager will allow for 16 synchronized midi streams. This corresponds to 1 per midi channel  
 
 - Kivy App: GUI
@@ -12,7 +12,9 @@ a lightweight markov midi sequencer for the people
       - MarkovPlayer: Pattern Generation
       - KeyCache: Polyphony Management & On/Off sequencing
 
-## i n s t a l l  ( M A C )
+## i n s t a l l  
+
+<i> m a c o s </i>
 <code>
 git clone https://github.com/jaquielajoie/pyplayer.git | cd pyplayer
 </code>  
@@ -37,7 +39,7 @@ cd src
 python gui.py
 </code>
 
-# GUI
+# G U I
 
 ![v1](img/v1.png "V1 GUI")
 
