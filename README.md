@@ -15,13 +15,13 @@ a lightweight markov midi sequencer for the people
 ## i n s t a l l  
 <code>
 git clone https://github.com/jaquielajoie/pyplayer.git | cd pyplayer
-</code>
-
+</code>  
+<br>
 <code>
 python3 -m venv .venv  |  
 source .venv/bin/activate  |  
 pip -r requirements.txt  
-</code>
+</code>  
 
 ## r u n
 - found inside of /src/ folder
