@@ -2,6 +2,8 @@
 a lightweight markov midi sequencer for the people
 > ~200 lines (core functionality)
 
+https://youtu.be/HrtuPT9xNvA
+
 # C o m p o n e n t s
 > ThreadManager will allow for 16 synchronized midi streams. This corresponds to 1 per midi channel  
 
