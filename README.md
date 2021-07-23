@@ -5,12 +5,11 @@ a lightweight markov midi sequencer for the people
 # C o m p o n e n t s
 > ThreadManager will allow for 16 synchronized midi streams. This corresponds to 1 per midi channel  
 
-- Kivy App: GUI
-  - ThreadManager: ThreadPoolExecutor
-    - MidiInterface: High Level Bussing
-      - SleepManager: Quantization & Synchronization
-      - MarkovPlayer: Pattern Generation
-      - KeyCache: Polyphony Management & On/Off sequencing
+- Kivy App: GUI & Threading
+  - MidiInterface: High Level Bussing
+    - SleepManager: Quantization & Synchronization
+    - MarkovPlayer: Pattern Generation
+    - KeyCache: Polyphony Management & On/Off sequencing
 
 ## i n s t a l l  
 

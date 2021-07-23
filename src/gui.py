@@ -2,7 +2,7 @@
 ==========================================
  Title:  PyPlayer GUI
  Author: @jaquielajoie
- Date:   10 July 2021
+ Date:   23 July 2021
  Liscence: Apache 2.0
 ==========================================
 """
@@ -15,12 +15,39 @@ from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
+from pyplayer.midointerface import MidiInterface
+import threading
 import os
-
 
 Builder.load_file(os.path.abspath('kivy/design/main.kv'))
 
+# returns a list of MidiInterface(s) based on configuration given
+def configure_midi_interfaces(midi_config):
 
+    interfaces = []
+    iters = 0
+
+    for conf in midi_config:
+        mi = MidiInterface()
+        mi.config_tracks(filepath=conf["filepath"])
+        mi.set_nlen(nlen=conf["ngram_len"])
+        mi.set_tempo(bpm=conf["bpm"])
+        mi.shift_velocity(vel=conf["velocity_shift"])
+        mi.shift_pitch(semitones=conf["pitch_shift"])
+        iters = conf["iters"]
+
+        """
+        Change channel_number to track number to be selected (of midi file)
+        """
+        # mi.set_tempo(bpm=120)
+        # mi.shift_pitch(semitones=0)
+        # mi.shift_velocity(vel=0)
+        # mi.remix_track(nlen=4, iters=10000)
+        interfaces.append(mi)
+
+    return interfaces, iters
+
+# main kivy app
 class AppContainer(Widget):
 
     def selected(self, filename):
@@ -142,12 +169,13 @@ class AppContainer(Widget):
 
                 midi_config = [conf] # channel number
 
-                self.threadmanager.start(midi_config)
-                # self.mi.config_tracks(filepath=filepath)
-                # self.mi.set_tempo(bpm=120)
-                # self.mi.shift_pitch(semitones=0)
-                # self.mi.shift_velocity(vel=0)
-                # self.mi.remix_track(nlen=4, iters=10000)
+                """
+                Replacing ThreadManager
+                """
+                self.interfaces, iters = configure_midi_interfaces(midi_config)
+
+                for interface in self.interfaces:
+                    threading.Thread(target=interface.remix_track, kwargs={"iters": iters}).start()
 
             except ValueError as v:
                 print(v)
@@ -164,8 +192,8 @@ class AppContainer(Widget):
         super(AppContainer, self).__init__(**kwargs)
 
         self.iters = 1
-        self.threadmanager = ThreadManager()
-
+        # self.threadmanager = ThreadManager()
+        self.interfaces = []
         # self.mi = MidiInterface() # replace this with ThreadManager
 
 

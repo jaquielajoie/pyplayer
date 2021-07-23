@@ -63,4 +63,4 @@ class KeyCache:
     def nuke(self):
         for tone in range(1, 128):
             off_note = self.tone_to_msg('note_off', tone=tone, time=0)
-            self.trigger_note(msg=off_msg)
+            self.trigger_note(msg=off_note)
