@@ -17,7 +17,7 @@ from pyplayer.midointerface import MidiInterface
 import threading
 import os
 
-Builder.load_file(os.path.abspath('kivy/design/main.kv'))
+Builder.load_file(os.path.abspath('kivy/design/v1.kv'))
 
 # returns a list of MidiInterface(s) based on configuration given
 def configure_midi_interfaces(midi_config):
