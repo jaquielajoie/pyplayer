@@ -1,8 +1,9 @@
 # p y p l a y e r
 a lightweight (🐍) markov midi sequencer for the people
-> ~200 lines (core functionality)
-> 100% python
-> cross-compatible
+> ~200 lines (core functionality)  
+> 100% python  
+> cross-compatible  
+> currently loads v1  
 
 https://youtu.be/HrtuPT9xNvA
 
