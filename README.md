@@ -1,6 +1,8 @@
 # p y p l a y e r
-a lightweight markov midi sequencer for the people
+a lightweight (🐍) markov midi sequencer for the people
 > ~200 lines (core functionality)
+> 100% python
+> cross-compatible
 
 https://youtu.be/HrtuPT9xNvA
 
@@ -9,9 +11,19 @@ https://youtu.be/HrtuPT9xNvA
 
 - Kivy App: GUI & Threading
   - MidiInterface: High Level Bussing
-    - SleepManager: Quantization & Synchronization
     - MarkovPlayer: Pattern Generation
-    - KeyCache: Polyphony Management & On/Off sequencing
+      - SleepManager: Quantization & Synchronization    
+      - KeyCache: Polyphony Management & On/Off sequencing
+
+### f a s t s t a t s
+- generates midi notes on the <b><i>BUS</i></b>
+- compatible with Linux, Windows, MacOS
+  - Future compatibility with iOS & Android
+- kivy GUI
+  - up to 16 MidiInterfaces per GUI
+    - 1 MarkovPlayer per MidiInterface
+      - 1 SleepManager injected into the MarkovPlayer
+      - 1 KeyCache injected into the MarkovPlayer
 
 ## i n s t a l l  
 
