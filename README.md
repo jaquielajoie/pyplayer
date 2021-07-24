@@ -3,7 +3,7 @@ a lightweight (🐍) markov midi sequencer for the people
 > ~200 lines (core functionality)  
 > 100% python  
 > cross-compatible  
-> currently loads v1  
+> L O A D S  V E R S I O N  1
 
 https://youtu.be/HrtuPT9xNvA
 
