@@ -122,6 +122,7 @@ class MarkovPlayer():
     	# add the note triggering interface
         self.interface = interface
         self.test = test
+        self.is_playing = False
 
     def run(self, iters, keycache, sleepmanager):
         """
@@ -162,14 +163,17 @@ class MarkovPlayer():
         note_key = random_key(self.midi_map["notes_map"])
         trigger_key = random_key(self.midi_map["triggers_map"])
         duration_key = random_key(self.midi_map["durations_map"])
+        self.is_playing = True
 
         keys = {"note_key": note_key, "trigger_key": trigger_key, "duration_key": duration_key}
 
         for i in range(0, iters):
-            keys, midi_map = cycle_note(keys, midi_map, self.interface, keycache, sleepmanager, self.test)
+            if self.is_playing:
+                keys, midi_map = cycle_note(keys, midi_map, self.interface, keycache, sleepmanager, self.test)
 
     def stop(self):
-        pass
+        # signal is sent from GUI > MidiInterface > mp.iters
+        self.is_playing = False
 
 if __name__ == "__main__":
     nlen = 2

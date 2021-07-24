@@ -78,6 +78,18 @@ class MidiInterface():
         self.vel = 0
         self.channel_number = 0
         self.nlen = 1
+        self.playable = False
+
+        self.keycache  = None
+        self.mp = None
+        self.sleepmanager = None
+
+    def make_playable(self, playing):
+        # marks interface playing status
+        self.playable = playing
+        # stops playing
+        if not playing:
+            self.mp.stop()
 
     def config_tracks(self, filepath=None):
         if filepath is None:
@@ -137,19 +149,13 @@ class MidiInterface():
         """
 
         """
-        mp = MarkovPlayer(nlen=self.nlen, midi_list=midi_list, interface=self)
-        keycache = KeyCache(port=self.port, polyphony=self.polyphony)
-        sleepmanager = SleepManager(bpm=self.bpm)
+        self.mp = MarkovPlayer(nlen=self.nlen, midi_list=midi_list, interface=self)
+        self.keycache = KeyCache(port=self.port, polyphony=self.polyphony)
+        self.sleepmanager = SleepManager(bpm=self.bpm)
 
-        mp.run(iters, keycache, sleepmanager)
+        self.mp.run(iters, self.keycache, self.sleepmanager)
         # turn all notes off
-        keycache.nuke()
-
-    def stop_playing(self):
-        """
-        end the remix_track process
-        """
-        print('triggered stop_playing...')
+        self.keycache.nuke()
 
 
 if __name__ == "__main__":

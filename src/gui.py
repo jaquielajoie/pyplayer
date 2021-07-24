@@ -9,8 +9,6 @@
 import kivy as kv
 from kivy.app import App
 from kivy.uix.widget import Widget
-from pyplayer.threadmanager import ThreadManager
-from pyplayer.threadmanager import ThreadManager
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
@@ -46,6 +44,7 @@ def configure_midi_interfaces(midi_config):
         interfaces.append(mi)
 
     return interfaces, iters
+
 
 # main kivy app
 class AppContainer(Widget):
@@ -143,49 +142,66 @@ class AppContainer(Widget):
     def start_press(self):
 
         if self.ids.midifile_label.text != "No file selected, cannot start!":
+            if not self.playing:
 
-            filepath = self.ids.midifile_label.text
-            ngram_len = int(self.ids.ngram_slider_out.text)
-            pitch_shift = int(self.ids.pitch_slider_out.text)
-            velocity_shift = int(self.ids.velocity_slider_out.text)
-            bpm = int(self.ids.bpm_slider_out.text)
-            iters = int(self.iters)
+                filepath = self.ids.midifile_label.text
+                ngram_len = int(self.ids.ngram_slider_out.text)
+                pitch_shift = int(self.ids.pitch_slider_out.text)
+                velocity_shift = int(self.ids.velocity_slider_out.text)
+                bpm = int(self.ids.bpm_slider_out.text)
+                iters = int(self.iters)
 
-            try:
-                raw = self.ids.iters_input.text
-                iters = int(raw)
+                try:
+                    raw = self.ids.iters_input.text
+                    iters = int(raw)
 
-                """
-                Test input
-                """
-                conf = {
-                    "filepath": filepath,
-                    "ngram_len": ngram_len,
-                    "pitch_shift": pitch_shift,
-                    "velocity_shift": velocity_shift,
-                    "bpm": bpm,
-                    "iters": iters
-                }
+                    """
+                    Test input
+                    """
+                    conf = {
+                        "filepath": filepath,
+                        "ngram_len": ngram_len,
+                        "pitch_shift": pitch_shift,
+                        "velocity_shift": velocity_shift,
+                        "bpm": bpm,
+                        "iters": iters
+                    }
 
-                midi_config = [conf] # channel number
+                    midi_config = [conf] # channel number
 
-                """
-                Replacing ThreadManager
-                """
-                self.interfaces, iters = configure_midi_interfaces(midi_config)
+                    """
+                    Replacing ThreadManager
+                    """
+                    self.interfaces, iters = configure_midi_interfaces(midi_config)
+                    self.playing = True
 
-                for interface in self.interfaces:
-                    threading.Thread(target=interface.remix_track, kwargs={"iters": iters}).start()
+                    threads = [] # is this needed?
 
-            except ValueError as v:
-                print(v)
-                quit()
+                    for interface in self.interfaces:
+                        # interface must be made playable
+                        interface.make_playable(playing=True)
+                        t = threading.Thread(target=interface.remix_track, kwargs={"iters": iters}).start()
+                        threads.append(t)
+
+
+                except ValueError as v:
+                    print(v)
+                    quit()
+            else:
+                print(f"{self.playing} a track is already playing!")
         else:
             print(f"You need to select a file!")
 
 
     def end_press(self):
-        pass
+
+        for interface in self.interfaces:
+            # interface must become unplayable
+            interface.make_playable(playing=False)
+
+        self.interfaces = []
+        self.playing = False
+        print(f"tracks were stopped!")
         # self.mi.stop_playing()
 
     def __init__(self, **kwargs):
@@ -194,6 +210,7 @@ class AppContainer(Widget):
         self.iters = 1
         # self.threadmanager = ThreadManager()
         self.interfaces = []
+        self.playing = False
         # self.mi = MidiInterface() # replace this with ThreadManager
 
 
