@@ -9,7 +9,7 @@ https://youtu.be/HrtuPT9xNvA
 # C o m p o n e n t s
 > ThreadManager will allow for 16 synchronized midi streams. This corresponds to 1 per midi channel  
 
-- Kivy App: GUI & Threading
+- kivy: GUI & Threading
   - MidiInterface: High Level Bussing
     - MarkovPlayer: Pattern Generation
       - SleepManager: Quantization & Synchronization    
