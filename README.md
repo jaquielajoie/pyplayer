@@ -42,6 +42,10 @@ python gui.py
 
 # G U I
 
+### v2
+![v2](img/v2.png "V2 GUI")
+
+### v1
 ![v1](img/v1.png "V1 GUI")
 
 - new midi files can be selected once all notes have been played
