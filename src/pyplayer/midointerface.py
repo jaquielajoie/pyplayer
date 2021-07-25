@@ -144,13 +144,13 @@ class MidiInterface():
             logging.info("play_tracks: finised thread")
 
     def remix_track(self, iters):
-        channel_number = min( (len(self.tracks) - 1 ), self.channel_number )
-        midi_list = decompose_messages(self.freeze_messages(self.tracks[channel_number]))
+        # channel_number = min( (len(self.tracks) - 1 ), self.channel_number )
+        midi_list = decompose_messages(self.freeze_messages(self.tracks[0])) # FIXME
         """
 
         """
         self.mp = MarkovPlayer(nlen=self.nlen, midi_list=midi_list, interface=self)
-        self.keycache = KeyCache(port=self.port, polyphony=self.polyphony)
+        self.keycache = KeyCache(port=self.port, polyphony=self.polyphony, channel_number=self.channel_number)
         self.sleepmanager = SleepManager(bpm=self.bpm)
 
         self.mp.run(iters, self.keycache, self.sleepmanager)

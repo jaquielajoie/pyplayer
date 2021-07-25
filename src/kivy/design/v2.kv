@@ -1,0 +1,357 @@
+#: import md_icons kivymd.icon_definitions.md_icons
+ScreenManager:
+    MDScreen:
+        id: main
+        name: "main"
+
+        MDBoxLayout:
+            orientation: 'vertical'
+
+            MDToolbar:
+                title:"PyPlayer"
+                md_bg_color: app.theme_cls.primary_dark
+                left_action_items:[["account",lambda x:None]]
+                right_action_items:[["cog", lambda x:None]]
+
+            MDBottomNavigation:
+                panel_color:.2,.2,.2,1
+
+                MDBottomNavigationItem:
+                    name:"track"
+                    text:"Tracks"
+                    icon:'music-note-outline'
+
+                    MDBoxLayout:
+                        orientation: 'vertical'
+
+                        MDGridLayout:
+                            cols:4
+                            adaptive_height:True
+                            spacing:"15dp"
+
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                padding:"15dp"
+                                adaptive_height: True
+
+                                MDSwitch:
+                                    id: active_file_0
+                                    pos_hint: {'center_x': .5, 'center_y': .5}
+
+                                MDRoundFlatIconButton:
+                                    id: choose_file_0
+                                    text: "Choose File"
+                                    icon: "folder"
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_release: app.file_manager_open(0)
+
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                padding:"15dp"
+
+                                MDSwitch:
+                                    id: active_file_1
+                                    pos_hint: {'center_x': .5, 'center_y': .5}
+
+                                MDRoundFlatIconButton:
+                                    id: choose_file_1
+                                    text: "Choose File"
+                                    icon: "folder"
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_release: app.file_manager_open(1)
+
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                padding:"15dp"
+
+                                MDSwitch:
+                                    id: active_file_2
+                                    pos_hint: {'center_x': .5, 'center_y': .5}
+
+                                MDRoundFlatIconButton:
+                                    id: choose_file_2
+                                    text: "Choose File"
+                                    icon: "folder"
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_release: app.file_manager_open(2)
+
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                padding:"15dp"
+
+                                MDSwitch:
+                                    id: active_file_3
+                                    pos_hint: {'center_x': .5, 'center_y': .5}
+
+                                MDRoundFlatIconButton:
+                                    id: choose_file_3
+                                    text: "Choose File"
+                                    icon: "folder"
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_release: app.file_manager_open(3)
+
+
+                MDBottomNavigationItem:
+                    name:"play"
+                    text:"Play"
+                    icon:'play-outline'
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        padding: "15dp"
+
+                        MDBoxLayout:
+                            orientation: "horizontal"
+                            padding: "15dp"
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                padding: "15dp"
+
+                                MDIconButton:
+                                    icon: 'clock-outline'
+                                    user_font_size: "64sp"
+                                    md_bg_color: 0.3, 0.3, 0.3, 1
+                                    theme_text_color: "Custom"
+                                    text_color: 0, 0, 0, 1
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_press:
+                                        root.current = "iterations"
+                                        root.transition.direction = 'left'
+
+                                MDLabel:
+                                    text: "Iterations"
+                                    halign: "center"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.5, 0.5, 0.5, 1
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                padding: "15dp"
+
+                                MDIconButton:
+                                    icon: 'playlist-music-outline'
+                                    user_font_size: "64sp"
+                                    md_bg_color: 0.3, 0.3, 0.3, 1
+                                    theme_text_color: "Custom"
+                                    text_color: 0, 0, 0, 1
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_press:
+                                        root.current = "pitches"
+                                        root.transition.direction = 'left'
+
+                                MDLabel:
+                                    text: "Pitches"
+                                    halign: "center"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.5, 0.5, 0.5, 1
+
+                        MDBoxLayout:
+                            orientation: "horizontal"
+                            padding: "15dp"
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                padding: "15dp"
+
+                                MDIconButton:
+                                    icon: 'function'
+                                    user_font_size: "64sp"
+                                    md_bg_color: 0.3, 0.3, 0.3, 1
+                                    theme_text_color: "Custom"
+                                    text_color: 0, 0, 0, 1
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_press:
+                                        root.current = "velocities"
+                                        root.transition.direction = 'left'
+
+
+                                MDLabel:
+                                    text: "Velocities"
+                                    halign: "center"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.5, 0.5, 0.5, 1
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                padding: "15dp"
+
+                                MDIconButton:
+                                    icon: 'speedometer'
+                                    user_font_size: "64sp"
+                                    md_bg_color: 0.3, 0.3, 0.3, 1
+                                    theme_text_color: "Custom"
+                                    text_color: 0, 0, 0, 1
+                                    pos_hint: {'center_x': .5, 'center_y': .6}
+                                    on_press:
+                                        root.current = "bpm"
+                                        root.transition.direction = 'left'
+
+                                MDLabel:
+                                    text: "BPM"
+                                    halign: "center"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.5, 0.5, 0.5, 1
+
+                        MDIconButton:
+                            id: play_pause_button
+                            icon: 'play'
+                            user_font_size: "64sp"
+                            md_bg_color: 0.3, 0.3, 0.3, 1
+                            theme_text_color: "Custom"
+                            text_color: 0, 0, 0, 1
+                            pos_hint: {'center_x': .5, 'center_y': .6}
+                            on_press: app.play_pause()
+
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            padding: "15dp"
+
+                            MDSlider:
+                                min: 1
+                                max: 16
+                                step: 1
+                                value: 1
+                                on_value: app.slide_ngram(*args)
+
+                            MDLabel:
+                                id: pattern_nlen_label
+                                text: "Pattern length of 1"
+                                halign: "center"
+                                theme_text_color: "Custom"
+                                text_color: 0.5, 0.5, 0.5, 1
+
+
+    MDScreen:
+        id: iterations
+        name: "iterations"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: "15dp"
+
+            MDLabel:
+                id: iterations_labal
+                text: "100 notes"
+                halign: "center"
+                font_size: 40
+
+            MDFloatLayout:
+
+                MDTextField:
+                    id: iterations_input
+                    hint_text: "Enter a positive whole number"
+                    helper_text: "Press return"
+                    helper_text_mode: "persistent"
+
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+
+                    pos_hint: {'center_x': .5, 'center_y': .6}
+                    halign: "center"
+                    on_text: app.set_iterations()
+
+            MDIconButton:
+                icon: "arrow-left"
+                user_font_size: "32sp"
+                on_press:
+                    root.current = "main"
+                    root.transition.direction = 'right'
+
+    MDScreen:
+        id: pitches
+        name: "pitches"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: "15dp"
+
+            MDFloatLayout:
+                MDSlider:
+                    min: -12
+                    max: 12
+                    value: 0
+                    step: 1
+
+
+            MDIconButton:
+                icon: "arrow-left"
+                user_font_size: "32sp"
+                on_press:
+                    root.current = "main"
+                    root.transition.direction = 'right'
+
+    MDScreen:
+        id: velocities
+        name: "velocities"
+
+        MDBoxLayout:
+            padding: "15dp"
+            orientation: "vertical"
+
+            MDLabel:
+                text: "Modify Channel Velocities"
+                halign: "center"
+                font_size: 40
+
+            ScrollView:
+                GridLayout:
+                    id: velocity_settings_panels
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+
+        MDIconButton:
+            icon: "arrow-left"
+            user_font_size: "32sp"
+            on_press:
+                root.current = "main"
+                root.transition.direction = 'right'
+
+    MDScreen:
+        id: bpm
+        name: "bpm"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: "15dp"
+
+            MDLabel:
+                id: bpm_label
+                text: "120 bpm"
+                halign: "center"
+                font_size: 40
+
+            MDFloatLayout:
+
+                MDTextField:
+                    id: bpm_input
+                    hint_text: "Enter a positive whole number"
+                    helper_text: "Press return"
+                    helper_text_mode: "persistent"
+
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+
+                    pos_hint: {'center_x': .5, 'center_y': .6}
+                    halign: "center"
+
+                    on_text: app.set_bpm()
+
+            MDIconButton:
+                icon: "arrow-left"
+                user_font_size: "32sp"
+                on_press:
+                    root.current = "main"
+                    root.transition.direction = 'right'
+
+<VelocityListItem>
+    size_hint_y: None
+    height: self.minimum_height
+
+    MDSlider:
+        min: -24
+        max: 24
+        value: 0
+        step: 1

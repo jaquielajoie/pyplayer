@@ -10,15 +10,18 @@ This class limits the number of keys pressed simultaneously
     and fixes on/off sequencing errors.
 
 Class limits the total number of pressed notes at one time
+
+Also determines what channel will receive notes
 """
 import mido
 
 class KeyCache:
 
-    def __init__(self, port, polyphony):
+    def __init__(self, port, polyphony, channel_number):
         self.polyphony = polyphony
         self.port = port
         self.activated_notes = [] # i.e. 55, 64, 38
+        self.channel_number = channel_number
 
     def process(self, msg):
         print(f'activated_notes: {self.activated_notes}')
@@ -49,11 +52,14 @@ class KeyCache:
 
     def convert_note(self, msg):
         # turn a note_off into a note_on
-        conv_msg = mido.Message('note_on', note=msg.note, time=msg.time)
+        print(f'convert_note: {self.channel_number}')
+
+        conv_msg = mido.Message('note_on', channel=self.channel_number, note=msg.note, time=msg.time)
         return conv_msg
 
     def tone_to_msg(self, trigger, tone, time):
-        off_msg = mido.Message(trigger, note=tone, time=time)
+        print(f'tone_to_msg: {self.channel_number}')
+        off_msg = mido.Message(trigger, channel=self.channel_number, note=tone, time=time)
         return off_msg
 
     def trigger_note(self, msg):

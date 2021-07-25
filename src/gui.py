@@ -7,32 +7,42 @@
 ==========================================
 """
 import kivy as kv
-from kivy.app import App
+from kivymd.app import MDApp
 from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
+from kivymd.toast import toast
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivymd.uix.filemanager import MDFileManager
+from kivy.uix.screenmanager import ScreenManager, Screen
 from pyplayer.midointerface import MidiInterface
+from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelThreeLine
 import threading
 import os
 
-Builder.load_file(os.path.abspath('kivy/design/v1.kv'))
+# expansion list content
+class VelocityListItem(BoxLayout):
+    '''CUstom content.'''
 
 # returns a list of MidiInterface(s) based on configuration given
-def configure_midi_interfaces(midi_config):
+def configure_midi_interfaces(midi_config, nlen):
 
     interfaces = []
-    iters = 0
+    for channel, conf in midi_config.items():
+        try:
+            mi = MidiInterface()
+            mi.config_tracks(filepath=conf["filepath"])
+            mi.set_nlen(nlen=nlen)
 
-    for conf in midi_config:
-        mi = MidiInterface()
-        mi.config_tracks(filepath=conf["filepath"])
-        mi.set_nlen(nlen=conf["ngram_len"])
-        mi.set_tempo(bpm=conf["bpm"])
-        mi.shift_velocity(vel=conf["velocity_shift"])
-        mi.shift_pitch(semitones=conf["pitch_shift"])
-        iters = conf["iters"]
+            mi.set_channel_number(channel_number=conf["channel_number"]) # FIXME
+        except KeyError as k:
+            print(f'No configuation was found for {channel}: {k}')
+        # mi.set_tempo(bpm=conf["bpm"])
+        # mi.shift_velocity(vel=conf["velocity_shift"])
+        # mi.shift_pitch(semitones=conf["pitch_shift"])
+        # iters = conf["iters"]
 
         """
         Change channel_number to track number to be selected (of midi file)
@@ -43,183 +53,213 @@ def configure_midi_interfaces(midi_config):
         # mi.remix_track(nlen=4, iters=10000)
         interfaces.append(mi)
 
-    return interfaces, iters
+    return interfaces
 
 
-# main kivy app
-class AppContainer(Widget):
-
-    def selected(self, filename):
-
-        try:
-            print(filename[0].split('/')[:-1])
-            self.ids.midifile_label.text = filename[0]
-            self.ids.midifile_label.color = (0, 1, 0, 0.65)
-
-
-        except Exception as e:
-            self.ids.midifile_label.text = "No file selected, cannot start!"
-            print(f"Error on select... {e}")
-
-    def slide_velocity(self, *args):
-
-        font_size = int(args[1]) / 2
-        color_intensity = abs(int(args[1]) / 100)
-
-        if int(args[1]) > 0:
-            color = (0, 0.65 + color_intensity, 0, 0.76 + color_intensity)
-        elif int(args[1]) < 0:
-            color = (0.65 + color_intensity, 0, 0, 0.76 + color_intensity)
-        else:
-            color = (0.65, 0.65, 0.65, 0.85 + color_intensity)
-
-        self.ids.velocity_slider_out.text = str(int(args[1]))
-        self.ids.velocity_slider_out.font_size = str(abs(font_size) + 16)
-        self.ids.velocity_slider_out.color = color
-
-    def slide_bpm(self, *args):
-
-        font_size = int(args[1]) / 20
-
-        color_intensity = int(args[1]) / 1000
-        color = (0.65 + color_intensity, 0.65 + color_intensity, \
-            0.65 + color_intensity, 0.76 + color_intensity)
-
-        self.ids.bpm_slider_out.text = str(int(args[1]))
-        self.ids.bpm_slider_out.font_size = str(font_size + 16)
-        self.ids.bpm_slider_out.color = color
-
-    def slide_ngram(self, *args):
-
-        font_size = int(args[1])
-        color_intensity = int(args[1]) / 100
-
-        color = (0.65 + color_intensity, 0.65 + color_intensity, \
-            0.65 + color_intensity, 0.84 + color_intensity)
-
-        self.ids.ngram_slider_out.text = str(int(args[1]))
-        self.ids.ngram_slider_out.font_size = str(font_size + 16)
-        self.ids.ngram_slider_out.color = color
-
-
-    def slide_pitch(self, *args):
-
-        font_size = int(args[1])
-        color_intensity = abs(int(args[1]) / 100)
-
-        if int(args[1]) > 0:
-            color = (0, 0.65 + color_intensity, 0, 0.85 + color_intensity)
-        elif int(args[1]) < 0:
-            color = (0.65 + color_intensity, 0, 0, 0.85 + color_intensity)
-        else:
-            color = (0.65, 0.65, 0.65, 0.85 + color_intensity)
-
-        self.ids.pitch_slider_out.text = str(int(args[1]))
-        self.ids.pitch_slider_out.font_size = str(abs(font_size) + 16)
-        self.ids.pitch_slider_out.color = color
-
-    def validate_int(self):
-
-        raw = self.ids.iters_input.text
-
-        try:
-            val = int(raw)
-
-            if isinstance(val, int) and val > 0:
-                self.ids.iters_valid_label.text = f'Program will generate {str(val)} note(s).'
-                self.ids.iters_valid_label.color = (0, 1, 0, 0.65)
-                self.iters = val
-
-            else:
-                self.ids.iters_valid_label.text = f'Invalid Iteration #: {str(val)}'
-                self.ids.iters_valid_label.color = (1, 0, 0, 0.65)
-
-        except ValueError as v:
-            self.ids.iters_valid_label.text = str(v)
-            self.ids.iters_valid_label.color = (1, 0, 0, 0.65)
-            print(v)
-
-    def start_press(self):
-
-        if self.ids.midifile_label.text != "No file selected, cannot start!":
-            if not self.playing:
-
-                filepath = self.ids.midifile_label.text
-                ngram_len = int(self.ids.ngram_slider_out.text)
-                pitch_shift = int(self.ids.pitch_slider_out.text)
-                velocity_shift = int(self.ids.velocity_slider_out.text)
-                bpm = int(self.ids.bpm_slider_out.text)
-                iters = int(self.iters)
-
-                try:
-                    raw = self.ids.iters_input.text
-                    iters = int(raw)
-
-                    """
-                    Test input
-                    """
-                    conf = {
-                        "filepath": filepath,
-                        "ngram_len": ngram_len,
-                        "pitch_shift": pitch_shift,
-                        "velocity_shift": velocity_shift,
-                        "bpm": bpm,
-                        "iters": iters
-                    }
-
-                    midi_config = [conf] # channel number
-
-                    """
-                    Replacing ThreadManager
-                    """
-                    self.interfaces, iters = configure_midi_interfaces(midi_config)
-                    self.playing = True
-
-                    threads = [] # is this needed?
-
-                    for interface in self.interfaces:
-                        # interface must be made playable
-                        interface.make_playable(playing=True)
-                        t = threading.Thread(target=interface.remix_track, kwargs={"iters": iters}).start()
-                        threads.append(t)
-
-
-                except ValueError as v:
-                    print(v)
-                    quit()
-            else:
-                print(f"{self.playing} a track is already playing!")
-        else:
-            print(f"You need to select a file!")
-
-
-    def end_press(self):
-
-        for interface in self.interfaces:
-            # interface must become unplayable
-            interface.make_playable(playing=False)
-
-        self.interfaces = []
-        self.playing = False
-        print(f"tracks were stopped!")
-        # self.mi.stop_playing()
+class MainApp(MDApp):
 
     def __init__(self, **kwargs):
-        super(AppContainer, self).__init__(**kwargs)
+        super().__init__(**kwargs)
+        Window.bind(on_keyboard=self.events)
+        self.manager_open = False
+        self.file_manager = MDFileManager(
+            exit_manager=self.exit_manager,
+            select_path=self.select_path,
+            ext=['.mid','.midi']
+        )
 
-        self.iters = 1
-        # self.threadmanager = ThreadManager()
+        self.channel_index_selected = None
+
+        self.midi_config = { # example format
+            "channel_0": {
+                "filepath": "",
+                "channel_number": 0,
+
+                # "pitch_shift": 0,
+                # "velocity_shift": 0,
+                # "bpm": None, # corresponds to global
+                "ngram": 1
+            }, "channel_1": {"channel_number": 1, "ngram": 1
+            }, "channel_2": {"channel_number": 2, "ngram": 1
+            }, "channel_3": {"channel_number": 3, "ngram": 1
+            }, "channel_4": {"channel_number": 4, "ngram": 1
+            }, "channel_5": {"channel_number": 5, "ngram": 1
+            }, "channel_6": {"channel_number": 6, "ngram": 1
+            }, "channel_7": {"channel_number": 7, "ngram": 1
+            }, "channel_8": {"channel_number": 8, "ngram": 1
+            }, "channel_9": {"channel_number": 9, "ngram": 1
+            }, "channel_10": {"channel_number": 10, "ngram": 1
+            }, "channel_11": {"channel_number": 11, "ngram": 1
+            }, "channel_12": {"channel_number": 12, "ngram": 1
+            }, "channel_13": {"channel_number": 13, "ngram": 1
+            }, "channel_14": {"channel_number": 14, "ngram": 1
+            }, "channel_15": {"channel_number": 15, "ngram": 1
+            } # 16 total channels
+        }
+
+        self.channel_widgets = {}
         self.interfaces = []
-        self.playing = False
-        # self.mi = MidiInterface() # replace this with ThreadManager
 
-
-class MarkovApp(App):
+        self.iterations = 100
+        self.bpm = 120 # make this a per track basis
+        self.nlen = 1
 
     def build(self):
-        Window.clearcolor = (0, 0, 0, 0)
-        return AppContainer()
+        self.title = "PyPlayer"
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Gray"
+        return Builder.load_file(os.path.abspath('kivy/design/v2.kv'))
+
+    """
+    BPM
+    """
+    def set_bpm(self):
+
+        try:
+            self.bpm = int(self.root.ids.bpm_input.text)
+        except ValueError as v:
+            print(f'set_iterations: {v}')
+            self.bpm = 0
+
+        self.root.ids.bpm_label.text = f'{self.bpm} bpm'
+
+    """
+    Iterations
+    """
+    def set_iterations(self):
+
+        try:
+            self.iterations = int(self.root.ids.iterations_input.text)
+        except ValueError as v:
+            print(f'set_iterations: {v}')
+            self.iterations = 0
+
+        self.root.ids.iterations_labal.text = f'{self.iterations} notes'
+
+    """
+    Iterations
+    """
+    def slide_ngram(self, *args):
+        self.nlen = int(args[1])
+        self.root.ids.pattern_nlen_label.text = f'Pattern length of {self.nlen}'
+
+    """
+    Create & Play -> MidiInterface(s)
+    Stop & Destryo -> self.interfaces
+    """
+    def play_pause(self):
+
+        state = self.root.ids.play_pause_button.icon
+
+        if state == 'play':
+            self.root.ids.play_pause_button.icon = 'pause'
+
+            try:
+                self.interfaces = configure_midi_interfaces(self.midi_config, self.nlen)
+                threads = [] # is this needed?
+
+                for interface in self.interfaces:
+                    # interface must be made playable
+                    interface.make_playable(playing=True)
+                    t = threading.Thread(target=interface.remix_track, kwargs={"iters": self.iterations}).start()
+                    threads.append(t)
+
+
+            except ValueError as v:
+                print(v)
+                quit()
+
+        elif state == 'pause':
+            self.root.ids.play_pause_button.icon = 'play'
+
+            for interface in self.interfaces:
+                try:
+                    # interface must become unplayable
+                    interface.make_playable(playing=False)
+                except Exception as e:
+                    print(f'Exception: {e} -- {interface}')
+
+            self.interfaces = []
+            print(f"tracks were stopped!")
+
+    """
+    File Manager
+    """
+    def file_manager_open(self, channel_index):
+        self.file_manager.show(os.path.abspath('midi/'))  # output manager to the screen
+        self.manager_open = True
+        self.channel_index_selected = channel_index
+
+    def select_path(self, path):
+        '''It will be called when you click on the file name
+        or the catalog selection button.
+
+        :type path: str;
+        :param path: path to the selected directory or file;
+        '''
+        self.update_midi_channel_details(self.channel_index_selected, path)
+
+        self.exit_manager()
+        toast(path)
+
+    def exit_manager(self, *args):
+        '''Called when the user reaches the root of the directory tree.'''
+
+        self.manager_open = False
+        self.file_manager.close()
+
+        print(f'The saved filepath was: {self.midi_config[f"channel_{self.channel_index_selected}"]["filepath"]}')
+        self.channel_index_selected = None # return to starting state
+
+    def events(self, instance, keyboard, keycode, text, modifiers):
+        '''Called when buttons are pressed on the mobile device.'''
+
+        if keyboard in (1001, 27):
+            if self.manager_open:
+                self.file_manager.back()
+        return True
+
+    def update_midi_channel_details(self, channel_index, path):
+        print(f'update_midi_channel_details {self.channel_index_selected} midi file.')
+
+        # switch statement
+        if channel_index == 0:
+            self.root.ids.choose_file_0.text = str(path.split('/')[::-1][0])
+            self.midi_config["channel_0"]["filepath"] = path
+
+            self.root.ids.active_file_0.active = True
+
+            self.root.ids.velocity_settings_panels.add_widget(
+                MDExpansionPanel(
+                    icon="music-note",
+                    content=VelocityListItem(),
+                    panel_cls=MDExpansionPanelThreeLine(
+                        text=f'{"channel_0"}',
+                        secondary_text=f'{str(path.split("/")[::-1][0])}',
+                        tertiary_text="Modify Velocity",
+                    )
+                )
+            )
+
+        if channel_index == 1:
+            self.root.ids.choose_file_1.text = str(path.split('/')[::-1][0])
+            self.midi_config["channel_1"]["filepath"] = path
+
+            self.root.ids.active_file_1.active = True
+
+        if channel_index == 2:
+            self.root.ids.choose_file_2.text = str(path.split('/')[::-1][0])
+            self.midi_config["channel_2"]["filepath"] = path
+
+            self.root.ids.active_file_2.active = True
+
+        if channel_index == 3:
+            self.root.ids.choose_file_3.text = str(path.split('/')[::-1][0])
+            self.midi_config["channel_3"]["filepath"] = path
+
+            self.root.ids.active_file_3.active = True
+
 
 
 if __name__ == "__main__":
-    app = MarkovApp().run()
+    app = MainApp().run()
