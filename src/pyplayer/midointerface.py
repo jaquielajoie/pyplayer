@@ -143,11 +143,28 @@ class MidiInterface():
             logging.info("play_tracks: waiting for the thread to finish")
             logging.info("play_tracks: finised thread")
 
-    def remix_track(self, iters):
+    def remix_track(self, iters, bus):
         # channel_number = min( (len(self.tracks) - 1 ), self.channel_number )
-        midi_list = decompose_messages(self.freeze_messages(self.tracks[0])) # FIXME
+        self.port = config_backend(port_string=bus)
         """
+        Safety check -->
+            Many midi files have blank tracks that cannot generate markov models if used.
+        """
+        midi_lists = []
 
+        for track in self.tracks:
+            midi_list = decompose_messages(self.freeze_messages(track))
+            midi_lists.append(midi_list)
+
+        largest_ml = {"notes": [], "triggers": [], "durations": []}
+        for ml in midi_lists:
+            if len(ml["notes"]) > len(largest_ml["notes"]): # notes, triggers, durations should be same len
+                largest_ml = ml
+
+        midi_list = largest_ml
+
+        """
+        Set up & run
         """
         self.mp = MarkovPlayer(nlen=self.nlen, midi_list=midi_list, interface=self)
         self.keycache = KeyCache(port=self.port, polyphony=self.polyphony, channel_number=self.channel_number)

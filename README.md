@@ -1,5 +1,5 @@
 # p y p l a y e r
-a lightweight (🐍) markov midi sequencer 
+a lightweight (🐍) markov midi sequencer
 > ~200 lines (core functionality)  
 > 100% python  
 > cross-compatible  
@@ -39,6 +39,9 @@ source .venv/bin/activate  |
 pip -r requirements.txt  
 </code>  
 
+### L o g i c
+https://www.youtube.com/watch?v=u5L5A4eJs8I
+
 ## r u n
 - found inside of /src/ folder
 - venv must be activated
@@ -66,6 +69,8 @@ python gui.py
 
 # B u s s i n g 🚌   🚌🚌   🚌🚌🚌
 - "IAC Driver Bus 1" is set as the default midi bus (MAC compatible)
+  - https://www.youtube.com/watch?v=t5g6VDZZqHI
+  - https://www.logicprohelp.com/instruments-tracks-midi-channels/
 - rtmidi is used as the mido backend
 - these must be changed in the code manually at the moment
 

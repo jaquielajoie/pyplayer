@@ -7,7 +7,9 @@
 ==========================================
 """
 import kivy as kv
+from kivy.metrics import dp
 from kivymd.app import MDApp
+from kivymd.uix.menu import MDDropdownMenu
 from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
@@ -22,19 +24,25 @@ from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelThreeLin
 import threading
 import os
 
+# class ScreenManagement(ScreenManager):
+#     pass
+
 # expansion list content
 class VelocityListItem(BoxLayout):
-    '''CUstom content.'''
+    '''Custom content.'''
 
 # returns a list of MidiInterface(s) based on configuration given
-def configure_midi_interfaces(midi_config, nlen):
+def configure_midi_interfaces(midi_config, nlen, pitch_shift, velocity_shift):
 
     interfaces = []
     for channel, conf in midi_config.items():
         try:
             mi = MidiInterface()
+
             mi.config_tracks(filepath=conf["filepath"])
             mi.set_nlen(nlen=nlen)
+            mi.shift_pitch(semitones=pitch_shift)
+            mi.shift_velocity(vel=velocity_shift)
 
             mi.set_channel_number(channel_number=conf["channel_number"]) # FIXME
         except KeyError as k:
@@ -61,6 +69,8 @@ class MainApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         Window.bind(on_keyboard=self.events)
+        Window.size = (600, 800)
+
         self.manager_open = False
         self.file_manager = MDFileManager(
             exit_manager=self.exit_manager,
@@ -68,7 +78,21 @@ class MainApp(MDApp):
             ext=['.mid','.midi']
         )
 
+        menu_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": f"Midi Bus",
+                "height": dp(56),
+                "on_release": lambda x=f"Midi Bus": self.menu_callback(x),
+             } # for i in range(5)
+        ]
+        self.menu = MDDropdownMenu(
+            items=menu_items,
+            width_mult=4,
+        )
+
         self.channel_index_selected = None
+        self.bus = "IAC Driver Bus 1"
 
         self.midi_config = { # example format
             "channel_0": {
@@ -103,12 +127,21 @@ class MainApp(MDApp):
         self.iterations = 100
         self.bpm = 120 # make this a per track basis
         self.nlen = 1
+        self.pitch_shift = 0
+        self.velocity_shift = 0
 
     def build(self):
         self.title = "PyPlayer"
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Gray"
         return Builder.load_file(os.path.abspath('kivy/design/v2.kv'))
+
+    """
+    Bus
+    """
+    def set_bus(self):
+        self.root.ids.bus_label.text = self.root.ids.bus_input.text
+        self.bus = self.root.ids.bus_input.text
 
     """
     BPM
@@ -122,6 +155,32 @@ class MainApp(MDApp):
             self.bpm = 0
 
         self.root.ids.bpm_label.text = f'{self.bpm} bpm'
+
+    """
+    Velocities
+    """
+    def set_velocity_shift(self, *args):
+
+        try:
+            self.velocity_shift = int(args[1])
+        except ValueError as v:
+            print(f'set_velocity_shift: {v}')
+            self.velocity_shift = 0
+
+        self.root.ids.velocity_shift_label.text = f'Velocity Shift: {self.velocity_shift}'
+
+    """
+    Pitches
+    """
+    def set_pitch_shift(self, *args):
+
+        try:
+            self.pitch_shift = int(args[1])
+        except ValueError as v:
+            print(f'set_velocity_shift: {v}')
+            self.pitch_shift = 0
+
+        self.root.ids.pitch_shift_label.text = f'Pitch Shift: {self.pitch_shift}'
 
     """
     Iterations
@@ -155,13 +214,14 @@ class MainApp(MDApp):
             self.root.ids.play_pause_button.icon = 'pause'
 
             try:
-                self.interfaces = configure_midi_interfaces(self.midi_config, self.nlen)
+                self.interfaces = configure_midi_interfaces(self.midi_config, self.nlen, self.pitch_shift, self.velocity_shift)
                 threads = [] # is this needed?
 
                 for interface in self.interfaces:
                     # interface must be made playable
                     interface.make_playable(playing=True)
-                    t = threading.Thread(target=interface.remix_track, kwargs={"iters": self.iterations}).start()
+                    kwargs = {"iters": self.iterations, "bus": self.bus}
+                    t = threading.Thread(target=interface.remix_track, kwargs=kwargs).start()
                     threads.append(t)
 
 
@@ -228,7 +288,7 @@ class MainApp(MDApp):
             self.midi_config["channel_0"]["filepath"] = path
 
             self.root.ids.active_file_0.active = True
-
+            """
             self.root.ids.velocity_settings_panels.add_widget(
                 MDExpansionPanel(
                     icon="music-note",
@@ -240,6 +300,7 @@ class MainApp(MDApp):
                     )
                 )
             )
+            """
 
         if channel_index == 1:
             self.root.ids.choose_file_1.text = str(path.split('/')[::-1][0])
@@ -259,7 +320,16 @@ class MainApp(MDApp):
 
             self.root.ids.active_file_3.active = True
 
+    """
+    Settings
+    """
+    def toolbar_callback(self, button):
+        self.menu.caller = button
+        self.menu.open()
 
+    def menu_callback(self, text_item):
+        self.menu.dismiss()
+        MDApp.get_running_app().root.current  = "settings"
 
 if __name__ == "__main__":
     app = MainApp().run()
