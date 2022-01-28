@@ -4,6 +4,7 @@ a lightweight (🐍) markov midi sequencer
 > 100% python  
 > cross-compatible  
 
+DEMO
 https://youtu.be/HrtuPT9xNvA
 
 # C o m p o n e n t s
